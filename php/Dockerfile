@@ -1,30 +1,43 @@
-user  nginx;
-worker_processes  1;
+FROM php:5.6-fpm
 
-error_log  /var/log/nginx/error.log warn;
-pid        /var/run/nginx.pid;
-daemon off;
+LABEL version="1.0"
 
+#
+# Install Useful Tools 
+#
+RUN apt-get update -y && \
+	apt-get install -y mysql-client && \
+	apt-get install -y git wget vim
+RUN apt-get install -y libmcrypt-dev  libzip-dev
 
-events {
-    worker_connections  1024;
-}
+#
+# install the PHP extensions we need
+#
+RUN apt-get update && apt-get install -y libpng12-dev libjpeg-dev && rm -rf /var/lib/apt/lists/* \
+	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
+	&& docker-php-ext-install gd
+RUN docker-php-ext-install mysqli
 
+# Use Custom PHP.ini configuration
+COPY config/php.ini /usr/local/etc/php/
 
-http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
+#
+# Install the WP-CLI
+#
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+	chmod +x wp-cli.phar && \
+	mv wp-cli.phar /usr/local/bin/wp
 
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
+#
+# Install Composer
+#
+RUN curl -sS https://getcomposer.org/installer | php && \
+	mv composer.phar /usr/local/bin/composer
+CMD ["export PATH=/root/.composer/vendor/bin:$PATH"] # Add Composer Binary to PATH
+RUN composer global config github-oauth.github.com 9236becd6d8d4ff01e29874597ee7b6e96abb7a5 # Github Token (Required for Composer Packages)
 
-    access_log  /var/log/nginx/access.log  main;
-
-    sendfile        off;
-    ##tcp_nopush     on;
-
-    keepalive_timeout  65;
-
-    include /etc/nginx/conf.d/*.conf;
-}
+#
+# Entrypoint Script
+#
+COPY config/php.sh /php.sh
+ENTRYPOINT ["/php.sh"]
