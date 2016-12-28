@@ -12,7 +12,7 @@ RUN chmod u=rwx /opt/bin/nginx-start.sh
 
 # SSL Certificate
 RUN mkdir /etc/nginx/ssl
-COPY certificate/nginx.crt /etc/nginx/ssl/nginx.crt
-COPY certificate/nginx.key /etc/nginx/ssl/nginx.key
+RUN cd /etc/nginx/ssl
+RUN openssl req -newkey rsa:2048 -nodes -subj "/C=US/ST=New York/L=Mn/O=Monsanto/CN=monsanto.com" -keyout nginx.key -x509 -days 365 -out nginx.crt
 
 ENTRYPOINT ["/opt/bin/nginx-start.sh"]
