@@ -1,9 +1,9 @@
-FROM ubuntu 
+FROM alpine:3.6 
 
 LABEL version="1.0.39"
 
-RUN apt-get update
-RUN apt-get install mysql-client wget make gcc libssl-dev zlib1g-dev e2fslibs-dev -y
+RUN apk update
+RUN apk add mysql-client wget make gcc build-base abuild binutils binutils-doc gcc-doc zlib-dev openssl-dev e2fsprogs-dev  
 
 WORKDIR "/root/"
 RUN wget --no-check-certificate https://www.tarsnap.com/download/tarsnap-autoconf-1.0.39.tgz
