@@ -1,13 +1,13 @@
-FROM php:5.6-fpm
+FROM php:7.0-fpm
 
-LABEL version="1.0"
+LABEL version="7.0"
 
 #
 # Install Useful Tools 
 #
 RUN apt-get update -y && \
 	apt-get install -y mysql-client && \
-	apt-get install -y git wget vim
+	apt-get install -y git wget 
 RUN apt-get install -y libmcrypt-dev  libzip-dev
 
 #
@@ -34,7 +34,6 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 RUN curl -sS https://getcomposer.org/installer | php && \
 	mv composer.phar /usr/local/bin/composer
 CMD ["export PATH=/root/.composer/vendor/bin:$PATH"] # Add Composer Binary to PATH
-RUN composer global config github-oauth.github.com 9236becd6d8d4ff01e29874597ee7b6e96abb7a5 # Github Token (Required for Composer Packages)
 
 #
 # Entrypoint Script
